@@ -47,15 +47,31 @@ namespace MomentForGist
             var resp = await client.PatchAsync(baseApiUrl+gistToken, new ByteArrayContent(postBody));
             var content = await resp.Content.ReadAsStringAsync();
             resp.EnsureSuccessStatusCode();
-
-
         }
 
-        public async Task<Gist> GetGist(string gistToken)
+        public async Task UpdateGistViaNewFile(string gistToken, File gistFile)
+        {
+            var oldGist = await GetGist(gistToken);
+            var files = oldGist["files"];
+
+            ((Dictionary<string,object>)files).Add(gistFile.filename,gistFile);
+
+            var dict = new Dictionary<string,object>();
+            dict.Add("description","Latest Moments from My Blog.\nhttp://scottyeung.top/moments ");
+            dict.Add("files", files);
+
+            var postBody = JsonSerializer.SerializeToUtf8Bytes(dict);
+
+            var resp = await client.PatchAsync(baseApiUrl+gistToken, new ByteArrayContent(postBody));
+            var content = await resp.Content.ReadAsStringAsync();
+            resp.EnsureSuccessStatusCode();
+        }
+
+        public async Task<Dictionary<string,object>> GetGist(string gistToken)
         {
             var resp = await client.GetAsync(baseApiUrl+gistToken);
             resp.EnsureSuccessStatusCode();
-            var gist = JsonSerializer.Deserialize<Gist>(await resp.Content.ReadAsStringAsync());
+            var gist = JsonSerializer.Deserialize<Dictionary<string,object>>(await resp.Content.ReadAsStringAsync());
             
             return gist;
             

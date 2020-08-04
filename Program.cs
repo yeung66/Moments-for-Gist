@@ -12,13 +12,18 @@ namespace MomentForGist
 
             var parse = new DiffParse();
             var diff = parse.GetNewContent();
+            var now = DateTime.Now;
+
+            if(string.IsNullOrEmpty(diff)) return;
 
             await client.UpdateGist(client.gistToken, new File(){
-                filename="Moment.md",
+                filename=$"Moment-{now.Year}{now.Month:00}{now.Day:00}.md",
                 type="text/plain",
                 language="Markdown",
                 content=diff
             });
+
+            Console.Write(diff);
 
 
         }
